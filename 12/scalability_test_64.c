@@ -15,8 +15,8 @@
 
 #define INDEX(i, j, k) ((i) * NY * NZ + (j) * NZ + (k))
 
-void apply_diffusion_3d(double *u, double *u_new, int NX){
-#pragma omp parallel for collapse(3)
+void apply_diffusion_3d(double *u, double *u_new, int NX, int numThreads){
+#pragma omp parallel for num_threads(numThreads) collapse(3)
   for (int i = 1; i < NX - 1; i++){
     for (int j = 1; j < NY - 1; j++){
       for (int k = 1; k < NZ - 1; k++){
@@ -27,19 +27,19 @@ void apply_diffusion_3d(double *u, double *u_new, int NX){
   }
 }
 
-double run_simulation(double *u, double *u_new, int NX){
+double run_simulation(double *u, double *u_new, int NX, int numThreads){
   struct timeval start, end;
   double elapsed = 0.0;
 
   for (int step = 0; step < STEPS; step++){
     gettimeofday(&start, NULL);
-    apply_diffusion_3d(u, u_new, NX);
+    apply_diffusion_3d(u, u_new, NX, numThreads);
     gettimeofday(&end, NULL);
 
     elapsed += (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
 
 // Copia u_new para u
-    #pragma omp parallel for collapse(3)
+    #pragma omp parallel for num_threads(numThreads) collapse(3)
     for (int i = 0; i < NX; i++){
       for (int j = 0; j < NY; j++){
         for (int k = 0; k < NZ; k++){
@@ -63,7 +63,6 @@ int main(){
       int multiplier = multipliers[m];
       int NX = BASE_NX * multiplier;
 
-      omp_set_num_threads(numThreads);
       size_t total_size = (size_t)NX * NY * NZ;
 
       double *u = calloc(total_size, sizeof(double));
@@ -82,7 +81,7 @@ int main(){
       int cz = NZ / 2;
       u[INDEX(cx, cy, cz)] = 1.0;
 
-      double elapsed = run_simulation(u, u_new, NX);
+      double elapsed = run_simulation(u, u_new, NX, numThreads);
       printf("%d\t%d\t%d\t%.6f\n", numThreads, multiplier, NX, elapsed);
 
       free(u);
