@@ -32,13 +32,11 @@ double run_simulation(double *u, double *u_new, int NX, int numThreads){
   double elapsed = 0.0;
 
   for (int step = 0; step < STEPS; step++){
-    gettimeofday(&start, NULL);
     apply_diffusion_3d(u, u_new, NX, numThreads);
-    gettimeofday(&end, NULL);
 
-    elapsed += (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
 
     // Copia u_new para u
+    gettimeofday(&start, NULL);
     #pragma omp parallel for num_threads(numThreads) collapse(3)
     for (int i = 0; i < NX; i++){
       for (int j = 0; j < NY; j++){
@@ -47,6 +45,8 @@ double run_simulation(double *u, double *u_new, int NX, int numThreads){
         }
       }
     }
+    gettimeofday(&end, NULL);
+    elapsed += (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
   }
 
   return elapsed;
