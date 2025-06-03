@@ -33,7 +33,7 @@ void save_slice_to_csv(double u[NX][NY][NZ], int step, int z_slice){
 
 // Aplica a equação de difusão 3D
 void apply_diffusion_3d(double u[NX][NY][NZ], double u_new[NX][NY][NZ]){
-  #pragma omp parallel for collapse(3) schedule(guided, 1)
+  #pragma omp parallel for schedule(guided, 32)
   for (int i = 1; i < NX - 1; i++){
     for (int j = 1; j < NY - 1; j++){
       for (int k = 1; k < NZ - 1; k++){
