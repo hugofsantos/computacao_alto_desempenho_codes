@@ -3,7 +3,7 @@
 #include <omp.h>
 #include <sys/time.h>
 
-#define NX 128
+#define BASE_NX 128
 #define NY 128
 #define NZ 128
 #define STEPS 100
@@ -93,6 +93,7 @@ double calcular_soma_centro(const double *u, int nx, int ny, int nz, int tamanho
 
 int main(){
   const int numThreads = 64;
+  const int NX = BASE_NX * 1; // Ex: usando um multiplicador de 1x
 
   printf("Iniciando simulação com parâmetros fixos:\n");
   printf("  - Threads OpenMP: %d\n", numThreads);
